@@ -1,0 +1,30 @@
+<!-- 卡片内嵌 / 筛选器联动 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+<gd-card
+    id="custom-card"
+    host="https://***.com"
+    ssoToken="**********"
+    domain="demo"
+    cdId="lf0c8ab616a394559b180529"
+    ps="embed"
+></gd-card>
+</body>
+<script>
+  const $card = document.getElementById('custom-card');
+  function setCardFilter () {
+    $card.setAttribute('filters', JSON.stringify([{
+      fdId: 'l72472c483a2742de81e9767',
+      name: '日期',
+      filterType: 'EQ',
+      filterValue: ['2020-01-01']
+    }]));
+  }
+</script>
+<script src="https://guandata-libs.oss-cn-hangzhou.aliyuncs.com/js-sdk.js"></script>
+</html>

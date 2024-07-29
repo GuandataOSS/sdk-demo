@@ -1,0 +1,30 @@
+<!-- 页面内嵌 / 筛选器联动 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<gd-dashboard
+    id="custom-dashboard"
+    host="https://***.com"
+    ssoToken="**********"
+    domain="demo"
+    dashboardId="k5ec1f12793f649c3960ec2a"
+    ps="iframe2"
+></gd-dashboard>
+</body>
+<script>
+    const $dashboard = document.getElementById('custom-dashboard');
+    function setDashboardFilter () {
+        $dashboard.setAttribute('filters', JSON.stringify([{
+            cdId: 'q9db09a2e5b8b44a4a46b271',
+            name: '测试',
+            filterType: 'GT',
+            filterValue: ['2020-03-01']
+        }]));
+    }
+</script>
+<script src="https://guandata-libs.oss-cn-hangzhou.aliyuncs.com/js-sdk.js"></script>
+</html>
