@@ -10,6 +10,8 @@
 | [floating-button-render](./Open-SDK/floating-button-render.js) | 渲染自定义悬浮按钮 |
 | [custom-redirect-page](./Open-SDK/custom-redirect-page.js)     | 获取用户信息完成跳转 |
 | [custom-page-render](./Open-SDK/custom-page-render.js)         | 用户自定义页面渲染 |
+| [card-page-filter-init](./Open-SDK/card-page-filter-init.js)         | 卡片详情页筛选器初始值url传参 |
+| [get-dom-by-text](./Open-SDK/get-dom-by-text.js)         | 通过文本获取节点并进行操作 |
 | [Google-analytics](./Open-SDK/Google-analytics.js)             | 谷歌埋点      |
 
 
