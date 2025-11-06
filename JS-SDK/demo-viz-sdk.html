@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viz SDK Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .example-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+        }
+
+        .example-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 500px;
+            border-radius: 4px;
+            background: #fafafa;
+            margin-bottom: 15px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: #1890ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #40a9ff;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .log-container {
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .log-entry.error {
+            color: #d73a49;
+        }
+
+        .log-entry.success {
+            color: #28a745;
+        }
+
+        .editor-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .editor-panel {
+            flex: 1;
+        }
+
+        .editor-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .editor-textarea {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            resize: vertical;
+            background: #fafafa;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        /* JSON 编辑器样式 */
+        .json-editor-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #fafafa;
+        }
+
+        .json-editor-container.focused {
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        .json-editor-container.valid {
+            border-color: #52c41a;
+            background: #f6ffed;
+        }
+
+        .json-editor-container.invalid {
+            border-color: #ff4d4f;
+            background: #fff2f0;
+        }
+
+        .json-editor {
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            margin: 0;
+            border: none;
+            outline: none;
+            resize: none;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            background: transparent;
+            color: transparent;
+            caret-color: #333;
+            z-index: 2;
+        }
+
+        .json-highlight {
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            margin: 0;
+            border: none;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            background: transparent;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: auto;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* 自定义 highlight.js 样式 */
+        .json-highlight .hljs {
+            background: transparent;
+            padding: 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .format-btn {
+            background: #52c41a;
+        }
+
+        .format-btn:hover {
+            background: #73d13d;
+        }
+
+        .reset-btn {
+            background: #faad14;
+        }
+
+        .reset-btn:hover {
+            background: #ffc53d;
+        }
+
+        #templateSelect,
+        #exampleSelector,
+        #chartTypeSelector1,
+        #chartTypeSelector2 {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #templateSelect:focus,
+        #exampleSelector:focus,
+        #chartTypeSelector1:focus,
+        #chartTypeSelector2:focus {
+            outline: none;
+            border-color: #1890ff;
+        }
+
+        /* 配置输入框样式 */
+        #baseUrlInput,
+        #publicPathInput,
+        #chart1Width,
+        #chart1Height,
+        #chart2Width,
+        #chart2Height {
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #baseUrlInput:focus,
+        #publicPathInput:focus,
+        #chart1Width:focus,
+        #chart1Height:focus,
+        #chart2Width:focus,
+        #chart2Height:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        #updateConfig,
+        #updateChart1Size,
+        #updateChart2Size {
+            background: #52c41a;
+            transition: background-color 0.2s ease;
+        }
+
+        #updateConfig:hover,
+        #updateChart1Size:hover,
+        #updateChart2Size:hover {
+            background: #73d13d;
+        }
+
+        #updateChart1Size,
+        #updateChart2Size {
+            background: #1890ff;
+        }
+
+        #updateChart1Size:hover,
+        #updateChart2Size:hover {
+            background: #40a9ff;
+        }
+
+        #toggleTheme1,
+        #toggleTheme2 {
+            background: #722ed1;
+        }
+
+        #toggleTheme1:hover,
+        #toggleTheme2:hover {
+            background: #9254de;
+        }
+
+        #changeChartType1,
+        #changeChartType2 {
+            background: #fa8c16;
+        }
+
+        #changeChartType1:hover,
+        #changeChartType2:hover {
+            background: #ffa940;
+        }
+
+        /* Tooltip 样式 */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            color: #666;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        .tooltip-content {
+            visibility: hidden;
+            width: 300px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 4px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -150px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .tooltip-content::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Viz SDK 示例</h1>
+
+        <div class="example-section">
+            <div class="example-title">SDK 配置</div>
+            <div class="controls">
+                <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label for="baseUrlInput" style="font-weight: 500; color: #333;">Base URL:</label>
+                        <input type="text" id="baseUrlInput" value="http://localhost:3001/"
+                            style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px; font-size: 14px;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label for="publicPathInput" style="font-weight: 500; color: #333;">Public Path:</label>
+                        <input type="text" id="publicPathInput" value=""
+                            style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px; font-size: 14px;">
+                        <span class="tooltip-container">
+                            ❓
+                            <div class="tooltip-content">
+                                可以在 BI 的 console 中查看 __GD_PUBLIC_PATH__ 来获取
+                            </div>
+                        </span>
+                    </div>
+                    <button id="updateConfig" style="background: #52c41a;">更新配置</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="example-section">
+            <div class="example-title">图表示例选择器</div>
+            <div class="controls">
+                <select id="exampleSelector">
+                    <option value="">选择示例...</option>
+                </select>
+                <button id="loadSelectedExample">加载图表</button>
+                <button id="destroySDK">清除图表</button>
+                <button id="toggleTheme1" style="background: #722ed1;">切换主题</button>
+            </div>
+            <div class="controls" style="margin-top: 10px;">
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label for="chartTypeSelector1" style="font-weight: 500; color: #333;">图表类型:</label>
+                        <select id="chartTypeSelector1"
+                            style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px; font-size: 14px;">
+                            <option value="">请先加载图表...</option>
+                        </select>
+                    </div>
+                    <button id="changeChartType1" style="background: #fa8c16;">切换类型</button>
+                </div>
+            </div>
+            <div class="controls" style="margin-top: 10px;">
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label for="chart1Width" style="font-weight: 500; color: #333;">宽度:</label>
+                        <input type="number" id="chart1Width" value="100" min="200" max="2000"
+                            style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 80px; font-size: 14px;">
+                        <span style="color: #666;">px</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label for="chart1Height" style="font-weight: 500; color: #333;">高度:</label>
+                        <input type="number" id="chart1Height" value="500" min="200" max="1000"
+                            style="padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; width: 80px; font-size: 14px;">
+                        <span style="color: #666;">px</span>
+                    </div>
+                    <button id="updateChart1Size" style="background: #1890ff;">更新尺寸</button>
+                </div>
+            </div>
+            <div id="chart1" class="chart-container"></div>
+            <div class="log-container">
+                <div id="log1"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://guandata-libs.oss-cn-hangzhou.aliyuncs.com/js-sdk.1.1.0.js"></script>
+    <!-- 引入示例数据和配置 -->
+    <script type="module">
+        const EXAMPLES = {
+            messages: {
+                'basic_column': {
+                    name: '基础柱状图',
+                    description: '使用 message 格式的基础柱状图示例',
+                    data: {
+                        "message_id": "e90bac12-7c0d-4efe-b93b-5e4d1ac885d6",
+                        "card": {
+                            "card_version": 2,
+                            "card_meta": {
+                                "chartType": "BASIC_COLUMN",
+                                "chartMeta": {
+                                    "chartMain": {
+                                        "zoneData": {
+                                            "row": [
+                                                {
+                                                    "fdType": "STRING",
+                                                    "metaType": "DIM",
+                                                    "name": "会员等级"
+                                                }
+                                            ],
+                                            "column": [
+                                                {
+                                                    "metaType": "MPH"
+                                                }
+                                            ],
+                                            "tooltip": [],
+                                            "metric": [
+                                                {
+                                                    "fdType": "DOUBLE",
+                                                    "metaType": "METRIC",
+                                                    "name": "平均交易金额",
+                                                    "fieldFormat": {
+                                                        "numberFormat": {
+                                                            "formatType": "NUMBER",
+                                                            "decimalPlaces": 2,
+                                                            "useThousandsSeparator": true,
+                                                            "suffix": "元",
+                                                            "divideDataBy": 1
+                                                        }
+                                                    }
+                                                }
+                                            ],
+                                            "metric_additional": []
+                                        },
+                                        "props": {
+                                            "chartLegend": {
+                                                "showLegend": true
+                                            },
+                                            "dataLabels": {
+                                                "metric": {
+                                                    "showNumber": true
+                                                },
+                                                "metricAdditional": {
+                                                    "showNumber": true
+                                                }
+                                            },
+                                            "grandTotal": {
+                                                "onRow": {
+                                                    "position": "TOP"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "query_result": {
+                            "columns": [
+                                {
+                                    "name": "会员等级",
+                                    "fdType": "STRING",
+                                    "seqNo": 0
+                                },
+                                {
+                                    "name": "平均交易金额",
+                                    "fdType": "DOUBLE",
+                                    "seqNo": 1
+                                }
+                            ],
+                            "preview": [
+                                [
+                                    "L1",
+                                    "120.57382293762551"
+                                ],
+                                [
+                                    "L2",
+                                    "123.99325147347734"
+                                ],
+                                [
+                                    "L3",
+                                    "122.96379170879656"
+                                ],
+                                [
+                                    "L4",
+                                    "117.10799580272817"
+                                ],
+                                [
+                                    "L5",
+                                    "121.52193768257028"
+                                ]
+                            ],
+                            "truncated": false,
+                            "sql": ""
+                        },
+                    }
+                },
+            },
+            options: {}
+        };
+
+        // 获取所有示例列表
+        function getAllExamples() {
+            const examples = [];
+
+            // 添加 messages 下的示例
+            Object.keys(EXAMPLES.messages).forEach(key => {
+                const example = EXAMPLES.messages[key];
+                examples.push({
+                    id: key,
+                    name: example.name,
+                    description: example.description,
+                    type: 'message',
+                    data: example.data
+                });
+            });
+
+            // 添加 options 下的示例
+            Object.keys(EXAMPLES.options).forEach(key => {
+                const example = EXAMPLES.options[key];
+                examples.push({
+                    id: key,
+                    name: example.name,
+                    description: example.description,
+                    type: 'option',
+                    data: example.data
+                });
+            });
+
+            return examples;
+        }
+
+        // 根据ID获取示例
+        function getExampleById(id) {
+            const allExamples = getAllExamples();
+            return allExamples.find(example => example.id === id);
+        }
+
+        // 主题枚举
+        const VizTheme = {
+            LIGHT: 'LIGHT',
+            DARK: 'DARK'
+        };
+
+        // 日志工具
+        function addLog(containerId, message, type = 'info') {
+            const logContainer = document.getElementById(containerId);
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function extractPathPrefix(location, pathSuffix) {
+            if (!location || !location.pathname) {
+                return '';
+            }
+
+            const pathname = location.pathname;
+
+            if (!pathSuffix) {
+                const lastSlashIndex = pathname.lastIndexOf('/');
+                return lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '';
+            }
+
+            const normalizedSuffix = pathSuffix.startsWith('/') ? pathSuffix : '/' + pathSuffix;
+
+            // 检查是否以完整后缀结尾
+            if (pathname.endsWith(normalizedSuffix)) {
+                return pathname.substring(0, pathname.length - normalizedSuffix.length);
+            }
+
+            // 检查是否包含指定的目录段
+            const suffixIndex = pathname.indexOf(normalizedSuffix);
+            if (suffixIndex !== -1) {
+                return pathname.substring(0, suffixIndex);
+            }
+
+            // fallback: 返回去掉文件名的目录路径
+            const lastSlashIndex = pathname.lastIndexOf('/');
+            return lastSlashIndex > 0 ? pathname.substring(0, lastSlashIndex) : '';
+        }
+
+        // 默认 SDK 配置
+        let config = {
+            BIAddress: {
+                baseUrl: 'https://demo.guandata.com',
+                publicPath: '',
+            },
+            theme: VizTheme.LIGHT
+        };
+        addLog('log1', JSON.stringify(location, null, 2), 'info')
+        addLog('log1', `使用配置: ${JSON.stringify(config)}`, 'info');
+
+        // 主题状态跟踪
+        let currentTheme = VizTheme.LIGHT;
+
+        // 配置更新功能
+        function updateSDKConfig() {
+            const baseUrl = document.getElementById('baseUrlInput').value.trim();
+            const publicPath = document.getElementById('publicPathInput').value.trim();
+
+            if (!baseUrl) {
+                addLog('log1', 'Base URL 不能为空', 'error');
+                return;
+            }
+
+            // 更新配置
+            config = {
+                BIAddress: {
+                    baseUrl: baseUrl,
+                    ...(publicPath && { publicPath: publicPath })
+                }
+            };
+
+            addLog('log1', `配置已更新: ${JSON.stringify(config)}`, 'success');
+
+            // 如果已有 SDK 实例，需要重新创建
+            if (sdk1) {
+                sdk1.destroy();
+                sdk1 = null;
+                addLog('log1', '已销毁旧的 SDK 实例，请重新加载图表', 'info');
+            }
+        }
+
+        // 绑定配置更新按钮事件
+        document.getElementById('updateConfig').addEventListener('click', updateSDKConfig);
+
+        // 图表尺寸更新功能
+        function updateChartSize(chartId, widthInputId, heightInputId, sdk, logId) {
+            const width = document.getElementById(widthInputId).value;
+            const height = document.getElementById(heightInputId).value;
+            const chartContainer = document.getElementById(chartId);
+
+            if (width && height) {
+                // 更新容器样式
+                chartContainer.style.width = width + 'px';
+                chartContainer.style.height = height + 'px';
+
+                // 如果 SDK 实例存在，触发 resize 事件
+                if (sdk) {
+                    // 等待 DOM 更新后再触发 resize
+                    setTimeout(() => {
+                        // 触发窗口 resize 事件，让图表自适应新尺寸
+                        window.dispatchEvent(new Event('resize'));
+                        addLog(logId, `图表尺寸已更新: ${width}px × ${height}px`, 'success');
+                    }, 100);
+                } else {
+                    addLog(logId, `容器尺寸已更新: ${width}px × ${height}px (请加载图表后生效)`, 'info');
+                }
+            } else {
+                addLog(logId, '请输入有效的宽度和高度值', 'error');
+            }
+        }
+
+        // 绑定图表1尺寸更新按钮事件
+        document.getElementById('updateChart1Size').addEventListener('click', () => {
+            updateChartSize('chart1', 'chart1Width', 'chart1Height', sdk1, 'log1');
+        });
+
+        // 示例1：图表示例选择器
+        let sdk1 = null;
+        let currentData1 = null; // 存储当前图表数据
+        let currentDataType1 = null; // 存储当前数据类型
+        const exampleSelector = document.getElementById('exampleSelector');
+        const chartTypeSelector1 = document.getElementById('chartTypeSelector1');
+
+        // 初始化示例选择器
+        function initializeExampleSelector() {
+            const examples = getAllExamples();
+
+            // 清空现有选项
+            exampleSelector.innerHTML = '<option value="">选择示例...</option>';
+
+            // 添加示例选项
+            examples.forEach(example => {
+                const option = document.createElement('option');
+                option.value = example.id;
+                option.textContent = `${example.name} (${example.type})`;
+                option.title = example.description;
+                exampleSelector.appendChild(option);
+            });
+
+            addLog('log1', `已加载 ${examples.length} 个示例`, 'info');
+        }
+
+        // 监听示例选择变化
+        exampleSelector.addEventListener('change', (e) => {
+            const selectedId = e.target.value;
+            if (selectedId) {
+                const example = getExampleById(selectedId);
+                if (example) {
+                    addLog('log1', `已选择: ${example.name} - ${example.description}`, 'info');
+                }
+            }
+        });
+
+        // 加载选中的示例
+        document.getElementById('loadSelectedExample').addEventListener('click', () => {
+            try {
+                const selectedId = exampleSelector.value;
+                if (!selectedId) {
+                    addLog('log1', '请先选择一个示例', 'error');
+                    return;
+                }
+
+                const example = getExampleById(selectedId);
+                if (!example) {
+                    addLog('log1', `未找到示例: ${selectedId}`, 'error');
+                    return;
+                }
+
+                const chartContainer = document.getElementById('chart1');
+
+                if (!sdk1) {
+                    sdk1 = new GDVizSDK(chartContainer, config);
+                    window.sdk1 = sdk1;
+                    addLog('log1', `SDK1 已创建，使用主题: ${currentTheme}`, 'info');
+                }
+
+                // 设置事件回调
+                sdk1.setEventCallback((event) => {
+                    addLog('log1', `图表事件: ${JSON.stringify(event.detail)}`, 'info');
+                });
+
+                // 根据示例类型加载数据
+                if (example.type === 'message') {
+                    sdk1.setMessage(example.data);
+                    currentData1 = example.data;
+                    currentDataType1 = 'message';
+                } else if (example.type === 'option') {
+                    sdk1.setOption(example.data);
+                    currentData1 = example.data;
+                    currentDataType1 = 'option';
+                }
+
+                // 更新图表类型选择器
+                const currentType = currentDataType1 === 'message' ?
+                    example.data.card.card_meta.chartType :
+                    example.data.chartType;
+                const availableTypes = updateChartTypeSelector(chartTypeSelector1, currentData1, currentType);
+
+                addLog('log1', `${example.name} 加载成功`, 'success');
+                addLog('log1', `可用图表类型: ${availableTypes.map(t => chartTypeDisplayNames[t] || t).join(', ')}`, 'info');
+
+            } catch (error) {
+                addLog('log1', `加载失败: ${error.message}`, 'error');
+                console.error('加载示例失败:', error);
+            }
+        });
+
+        document.getElementById('destroySDK').addEventListener('click', () => {
+            if (sdk1) {
+                sdk1.destroy();
+                sdk1 = null;
+                currentData1 = null;
+                currentDataType1 = null;
+                // 重置图表类型选择器
+                chartTypeSelector1.innerHTML = '<option value="">请先加载图表...</option>';
+                addLog('log1', 'SDK 已销毁', 'info');
+            }
+        });
+
+        // 切换主题功能
+        function toggleTheme() {
+            currentTheme = currentTheme === VizTheme.LIGHT ? VizTheme.DARK : VizTheme.LIGHT;
+
+            // 更新配置
+            config.theme = currentTheme;
+
+            // 更新现有的SDK实例
+            if (sdk1) {
+                sdk1.setTheme(currentTheme);
+                addLog('log1', `已切换到 ${currentTheme} 主题`, 'success');
+            }
+
+            // 更新按钮文本
+            const themeText = currentTheme === VizTheme.LIGHT ? '浅色' : '深色';
+            document.getElementById('toggleTheme1').textContent = `切换主题 (当前: ${themeText})`;
+
+            addLog('log1', `全局主题已切换为: ${currentTheme}`, 'info');
+        }
+
+        // 绑定主题切换按钮事件
+        document.getElementById('toggleTheme1').addEventListener('click', toggleTheme);
+
+        // 绑定图表类型切换按钮事件
+        document.getElementById('changeChartType1').addEventListener('click', () => {
+            const selectedType = chartTypeSelector1.value;
+            if (!selectedType) {
+                addLog('log1', '请选择要切换的图表类型', 'error');
+                return;
+            }
+
+            const newData = changeChartType(sdk1, currentData1, currentDataType1, selectedType, 'log1');
+            if (newData) {
+                currentData1 = newData;
+                // 更新选择器以反映新的当前类型
+                updateChartTypeSelector(chartTypeSelector1, currentData1, selectedType);
+            }
+        });
+
+
+        // 图表类型中文名称映射
+        const chartTypeDisplayNames = {
+            'BASIC_COLUMN': '单柱图',
+            'GROUPED_COLUMN': '簇状图',
+            'STACKED_COLUMN': '堆积图',
+            'STACKED_SPLIT_COLUMN': '分组堆积图',
+            'PERCENT_STACKED_COLUMN': '百分比堆积图',
+            'GROUPED_COLUMN_WITH_LINE': '簇状 + 折线图',
+            'STACKED_COLUMN_WITH_LINE': '堆积 + 折线图',
+            'GROUPED_COLUMN_WITH_SYMBOL': '簇状 + 符号图',
+            'STACKED_COLUMN_WITH_SYMBOL': '堆积 + 符号图',
+            'BASIC_BAR': '单条图',
+            'BASIC_LINE': '单线图',
+            'MULTI_LINE': '多线图',
+            'PIE': '饼图',
+            'BASIC_BUBBLE': '气泡图',
+            'PROGRESS_BAR': '进度条',
+            'KPI_CARD': '对比指标卡',
+            'SINGLE_VALUE': '指标卡',
+            'PIVOT_TABLE': '表格'
+        };
+
+        // 更新图表类型选择器
+        function updateChartTypeSelector(selector, currentData, currentType) {
+            // 清空现有选项
+            selector.innerHTML = '';
+
+            if (!currentData) {
+                selector.innerHTML = '<option value="">请先加载图表...</option>';
+                return;
+            }
+
+            try {
+                // 获取可用的图表类型
+                const availableTypes = GDVizSDK.getAvailableChartTypes(currentData);
+
+                if (availableTypes.length === 0) {
+                    selector.innerHTML = '<option value="">暂无可用图表类型</option>';
+                    return;
+                }
+
+                // 添加选项
+                availableTypes.forEach(type => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = chartTypeDisplayNames[type] || type;
+                    if (type === currentType) {
+                        option.selected = true;
+                    }
+                    selector.appendChild(option);
+                });
+
+                return availableTypes;
+            } catch (error) {
+                console.error('获取可用图表类型失败:', error);
+                selector.innerHTML = '<option value="">获取图表类型失败</option>';
+                return [];
+            }
+        }
+
+        // 切换图表类型
+        function changeChartType(sdk, currentData, currentDataType, newChartType, logId) {
+            if (!sdk || !currentData || !newChartType) {
+                addLog(logId, '请先加载图表并选择新的图表类型', 'error');
+                return null;
+            }
+
+            try {
+                let resultData = currentData;
+
+                // 使用新接口进行图表类型切换
+                if (currentDataType === 'message') {
+                    // 使用新的 setMessage 接口，传入 chartType 参数
+                    sdk.setMessage(currentData, newChartType);
+                } else if (currentDataType === 'option') {
+                    // 对于 option 数据，仍需要修改数据结构
+                    let newData = JSON.parse(JSON.stringify(currentData));
+                    newData.chartType = newChartType;
+                    sdk.setOption(newData);
+                    resultData = newData;
+                }
+
+                addLog(logId, `图表类型已切换为: ${chartTypeDisplayNames[newChartType] || newChartType}`, 'success');
+                return resultData;
+            } catch (error) {
+                addLog(logId, `切换图表类型失败: ${error.message}`, 'error');
+                console.error('切换图表类型失败:', error);
+                return null;
+            }
+        }
+
+
+        // 初始化配置输入框
+        function initializeConfigInputs() {
+            const baseUrlInput = document.getElementById('baseUrlInput');
+            const publicPathInput = document.getElementById('publicPathInput');
+
+            // 使用当前配置初始化输入框
+            baseUrlInput.value = config.BIAddress.baseUrl;
+            publicPathInput.value = config.BIAddress.publicPath || '';
+
+            addLog('log1', '配置输入框已初始化', 'info');
+        }
+
+        // 初始化尺寸输入框
+        function initializeSizeInputs() {
+            // 初始化图表1的尺寸输入框
+            document.getElementById('chart1Width').value = 960;
+            document.getElementById('chart1Height').value = 500;
+
+            addLog('log1', '尺寸输入框已初始化', 'info');
+        }
+
+        // 初始化图表类型选择器
+        function initializeChartTypeSelectors() {
+            chartTypeSelector1.innerHTML = '<option value="">请先加载图表...</option>';
+
+            addLog('log1', '图表类型选择器已初始化', 'info');
+        }
+
+        // 页面加载完成后的初始化
+        window.addEventListener('load', () => {
+            addLog('log1', 'Viz SDK Example 已加载', 'success');
+
+            // 初始化配置输入框
+            initializeConfigInputs();
+
+            // 初始化尺寸输入框
+            initializeSizeInputs();
+
+            // 初始化图表类型选择器
+            initializeChartTypeSelectors();
+
+            // 初始化主题按钮文本
+            const themeText = currentTheme === VizTheme.LIGHT ? '浅色' : '深色';
+            document.getElementById('toggleTheme1').textContent = `切换主题 (当前: ${themeText})`;
+
+            initializeExampleSelector();
+        });
+
+        // 全局错误处理
+        window.addEventListener('error', (event) => {
+            addLog('log1', `全局错误: ${event.error?.message || event.message}`, 'error');
+            addLog('log2', `全局错误: ${event.error?.message || event.message}`, 'error');
+        });
+    </script>
+</body>
+
+</html>

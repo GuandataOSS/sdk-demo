@@ -19,4 +19,5 @@
 | 名称                                                   | 介绍        |
 |------------------------------------------------------|-----------|
 | [demo-card](./JS-SDK/demo-card.html)                 | 卡片内嵌 / 筛选器联动   |
-| [demo-dashboard](./JS-SDK/demo-dashboard.js) | 页面内嵌 / 筛选器联动 |
+| [demo-dashboard](./JS-SDK/demo-dashboard.html) | 页面内嵌 / 筛选器联动 |
+| [demo-viz-sdk](./JS-SDK/demo-viz-sdk.html) | 图表渲染示例 | 
