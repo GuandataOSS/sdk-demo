@@ -33,7 +33,7 @@
 ### 基础用法
 
 ```javascript
-<script src="path/to/js-sdk.1.1.0.js"></script>
+<script src="path/to/js-sdk.x.y.z.js"></script>
 
 // 创建 SDK 实例
 const sdk = new GDVizSDK(document.getElementById('chart'), {
